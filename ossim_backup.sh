@@ -1,22 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 
-# Checking if the programm was executed previously
-function first_check 
-{
-if [ -e /var/log/backup_script_errors ]
+# Check if there are updates
+if [ ! -e /var/lib/ossim/backup ]
 then
-  go_on
-else
-mkdir /var/log/backup_script_errors
-  go_on
+  exit
 fi
-}
-#
-function go_on
-{
-  tar -cJf $folder/$HOSTNAME_$(date +%F)_backup.tar.xz /usr/lib/ossim/backup/*setup* 2>$folderror/$(date +%F)_error.log
-}
-#
-mkdir /tmp/script_griffith
-folder=/tmp/script_griffith
+##########
+# Backup Server Host/IP
+host=""
+# Backup Server Host/IP port if not apply for SSH or is modified
+port=""
+# Backup Server User
+user=""
+# Checking if the programm was executed previously and create some envs
+if [ ! -e /var/log/backup_script_errors ]
+then
+  mkdir /var/log/backup_script_errors
+fi
 folderror=/var/log/backup_script_errors
+# Compressing
+tar -cJf /tmp/$HOSTNAME_$(date +%F)_backup.tar.xz /usr/lib/ossim/backup/*setup* 2>$folderror/$(date +%F)_compression_error.log
+#
+rsync /tmp/*backup*$xz $user@$host:/path_to_remote_backup_folder 2>$folderror/$(date +%F)_rsync_error.log
+
+
