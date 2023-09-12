@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Check if there are updates
+# Check if there are updates of ossim configuration
 if [ ! -e /var/lib/ossim/backup ]
 then
   exit
