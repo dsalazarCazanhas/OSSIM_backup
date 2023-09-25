@@ -1,26 +1,16 @@
 #!/bin/bash
-
-# Check if there are updates of ossim configuration
-if [ ! -e /var/lib/ossim/backup ]
+if [ ! -d /var/alienvault/backup ]
 then
-  exit
+	exit
 fi
-##########
-# Backup Server Host/IP
-host=""
-# Backup Server Host/IP port if not apply for SSH or is modified
-port=""
-# Backup Server User
-user=""
-# Checking if the programm was executed previously and create some envs
-if [ ! -e /var/log/backup_script_errors ]
+backup_user='bavapi'
+backup_ip="192.168.65.178"
+path2backup="~/ossim_backup"
+if [ ! -d /var/alienvault/backup_script_errors  ]
 then
-  mkdir /var/log/backup_script_errors
+	mkdir /var/alienvault/backup_script_errors
 fi
-folderror=/var/log/backup_script_errors
-# Compressing
-tar -cJf /tmp/$HOSTNAME_$(date +%F)_backup.tar.xz /usr/lib/ossim/backup/*setup* 2>$folderror/$(date +%F)_compression_error.log
-#
-rsync /tmp/*backup*$xz $user@$host:/path_to_remote_backup_folder 2>$folderror/$(date +%F)_rsync_error.log
-
-
+rm /tmp/*backup*.xz 2>/dev/null
+tar -cJf /tmp/$HOSTNAME_$(date +%F)_backup.tar.xz /var/alienvault/backup/*configuration*$'gz' 2> /var/alienvault/backup_script_errors/$(date +%F)_error.log
+rsync /tmp/*backup*$'xz' ${backup_user}@${backup_ip}:${path2backup}
+echo "done!!"
