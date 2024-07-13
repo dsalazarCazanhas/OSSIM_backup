@@ -1,17 +1,14 @@
 #!/bin/bash
-errors_logs="$HOME/errors"
+errors_logs="/var/log/external_bck"
 
-gen_logs(){
+#gen_logs(){
 if [ ! -d "$errors_logs" ]; then mkdir "$errors_logs"; fi
-}
+#}
 
-retry(){
-	if [ "$(echo $?)" != "0" ]; then $1; else echo "done"; fi
-}
 
-copy(){
-	local backup_user="dproxy"
-	local backup_ip="192.168.65.178"
+copy_ssh(){
+	local backup_user="ssh_user"
+	local backup_ip="ssh_ip"
 	local path2backup="/srv/home/ossim_backup/"
 	local ssh_pub_key="$HOME/.ssh/id_rsa_pub"
 
@@ -19,7 +16,7 @@ copy(){
 }
 
 compress(){
-	tar -cvJf "/tmp/${HOSTNAME}_$(date +%F)_fram.tar.xz" "/var/alienvault/backup/configuration*$gz" 2> "$errors_logs/$(date +%F)_error.log"
+	tar -cvJf "/tmp/${HOSTNAME}_$(date +%F)_framw.tar.xz" "/var/alienvault/backup/configuration*$gz" 2> "$errors_logs/$(date +%F)_error.log"
 	tar -cvJf "/tmp/${HOSTNAME}_$(date +%F)_siem.tar.xz" "/var/lib/ossim/backup/configuration*$gz" 2> "$errors_logs/$(date +%F)_error.log"
 }
 
@@ -27,13 +24,12 @@ transfer_ssh() {
 	local alienvault_backup="/var/alienvault/backup/"
 	local ossim_backup="/var/lib/ossim/backup/"
 
-	if [ ! -d $alienvault_backup ]; then
-		echo "ossim_backup: $alienvault_backup: ENOENT No such file or directory" > /dev/stderr
-		exit 2
-	fi
+#	if [ ! -d $alienvault_backup ]; then
+#		echo "ossim_backup: $alienvault_backup: ENOENT No such file or directory" > /dev/stderr
+#		exit 2
+#	fi
 
-	compress "$alienvault_backup"
-	#compress "siem_backup" "$ossim_backup"
+  compress
 	copy
 	retry copy
 }
@@ -45,9 +41,8 @@ transfer_nfs() {
 	if [ ! -d $alienvault_backup ]; then
 		echo "ossim_backup: $alienvault_backup: ENOENT No such file or directory" > /dev/stderr
 		exit 2
-	fi
-	mkdir /mnt/pancho
-	mount -n ${host_backup}:${server_backup_folder} /mnt/pancho
+	
+  mount -n ${host_backup}:${server_backup_folder} /mnt
 	compress "$alienvault_backup"
 	#compress "siem_backup" "$ossim_backup"
 	copy
